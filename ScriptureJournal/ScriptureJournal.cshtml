@@ -24,14 +24,14 @@
 
 <h2>List Scriptures</h2>
 <form method="get">
-    <div>
+    <div class="form">
         <label for="searchBook">Book of scripture:</label>
         <input type="text" id="searchBook" name="searchBook" value="@Request.QueryString["searchBook"]" />
         <input type="Submit" value="Search by Book" /><br />
         (Leave blank to list all scriptures.)<br />
     </div>
 
-    <div>
+    <div class="form">
         <label for="searchKeyword">Notes contains the following:</label>
         <input type="text" id ="searchKeyword" name="searchKeyword" value="@Request.QueryString["searchKeyword"]" />
         <input type="Submit" value="Search Keyword" /><br />
