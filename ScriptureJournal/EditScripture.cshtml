@@ -1,0 +1,93 @@
+﻿@{
+    Layout = "~/_Layout.cshtml";
+    Page.Title = "Edit Scripture Entry";
+
+    var book = "";
+    var chapter = "";
+    var verse = "";
+    var notes = "";
+    var  scriptureId= "";
+
+    if (!IsPost)
+    {
+        if (!Request.QueryString["ID"].IsEmpty() && Request.QueryString["ID"].IsInt())
+        {
+            scriptureId = Request.QueryString["ID"];
+            var db = Database.Open("Scriptures");
+            var dbCommand = "SELECT * FROM ScriptureJournal WHERE ID = @0";
+            var row = db.QuerySingle(dbCommand, scriptureId);
+
+            if (row != null)
+            {
+                book = row.Book;
+                chapter = row.Chapter;
+                verse = row.Verse;
+                notes = row.Notes;
+            }
+            else
+            {
+                Validation.AddFormError("No scripture was selected.");
+            }
+        }
+        else
+        {
+            Validation.AddFormError("No scripture was selected.");
+        }
+    }
+
+    if (IsPost)
+    {
+        Validation.RequireField("book", "Book cannot be blank");
+        Validation.RequireField("chapter", "Chapter cannot be blank");
+        Validation.RequireField("verse", "Verse cannot be blank");
+        Validation.RequireField("notes", "Notes cannot be blank");
+        Validation.RequireField("scriptureid", "No scripture ID was submitted!");
+
+        book = Request.Form["book"];
+        chapter = Request.Form["chapter"];
+        verse = Request.Form["verse"];
+        notes = Request.Form["notes"];
+        scriptureId = Request.Form["scriptureId"];
+
+        if (Validation.IsValid())
+        {
+            var db = Database.Open("Scriptures");
+            var updateCommand = "UPDATE ScriptureJournal SET Book=@0, Chapter=@1, Verse=@2, Notes=@3 WHERE Id=@4";
+            db.Execute(updateCommand, book, chapter, verse,notes, scriptureId);
+            Response.Redirect("~/ScriptureJournal");
+        }
+    }
+}
+
+<h2>Edit a Scripture Entry</h2>
+@Html.ValidationSummary()
+<form method="post">
+    <fieldset>
+        <legend>Scripture Information</legend>
+
+        <p>
+            <label for="book">Book:</label>
+            <input type="text" id="book" name="book" value="@book" />
+        </p>
+
+        <p>
+            <label for="chapter">Chapter:</label>
+            <input type="text" id="chapter" name="chapter" value="@chapter" />
+        </p>
+
+        <p>
+            <label for="verse">Verse:</label>
+            <input type="text" id="verse" name="verse" value="@verse" />
+        </p>
+
+        <p>
+            <label for="notes">Notes:</label>
+            <input type="text" id="notes" name="notes" value="@notes" />
+        </p>
+
+        <input type="hidden" name="scriptureid" value="@scriptureId" />
+
+        <p><input type="submit" name="buttonSubmit" value="Submit Changes" /></p>
+    </fieldset>
+</form>
+<p><a href="~/ScriptureJournal">Return to list of Scriptures</a>

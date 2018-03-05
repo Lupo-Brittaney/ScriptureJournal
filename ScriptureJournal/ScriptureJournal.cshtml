@@ -1,0 +1,57 @@
+﻿@{
+    Layout = "~/_Layout.cshtml";
+    Page.Title = "Scripture Journal";
+
+    var db = Database.Open("Scriptures");
+    var selectCommand = "SELECT * FROM ScriptureJournal";
+    var searchTerm = "";
+
+    if (!Request.QueryString["searchBook"].IsEmpty())
+    {
+        selectCommand = "SELECT * FROM ScriptureJournal WHERE Book = @0";
+        searchTerm = Request.QueryString["searchBook"];
+    }
+
+    if (!Request.QueryString["searchKeyword"].IsEmpty())
+    {
+        selectCommand = "SELECT * FROM ScriptureJournal WHERE Notes LIKE @0";
+        searchTerm = "%" + Request.QueryString["searchKeyword"] + "%";
+    }
+
+    var selectedData = db.Query(selectCommand, searchTerm);
+    var grid = new WebGrid(source: selectedData, defaultSort: "Book", rowsPerPage: 5);
+}
+
+<h2>List Scriptures</h2>
+<form method="get">
+    <div>
+        <label for="searchBook">Book of scripture:</label>
+        <input type="text" id="searchBook" name="searchBook" value="@Request.QueryString["searchBook"]" />
+        <input type="Submit" value="Search by Book" /><br />
+        (Leave blank to list all scriptures.)<br />
+    </div>
+
+    <div>
+        <label for="searchKeyword">Notes contains the following:</label>
+        <input type="text" id ="searchKeyword" name="searchKeyword" value="@Request.QueryString["searchKeyword"]" />
+        <input type="Submit" value="Search Keyword" /><br />
+    </div>
+</form>
+
+<div>
+    @grid.GetHtml(
+                    tableStyle: "grid",
+                    headerStyle: "head",
+                    alternatingRowStyle: "alt",
+                    columns: grid.Columns(
+                        grid.Column(format: @<a href="~/EditScripture?id=@item.ID">Edit</a>),
+                        grid.Column("Book"),
+                        grid.Column("Chapter", canSort: false),
+                        grid.Column("Verse", canSort: false),
+                        grid.Column("Notes", canSort: false),
+                        grid.Column("Date", "Date", format:@<text> @item.Date.ToString("MM/dd/yyyy")</text>),
+                        grid.Column(format: @<a href="~/DeleteScripture?id=@item.ID">Delete</a>)
+                                                                            )
+                                                                        )
+</div>
+<p><a href="~/AddScripture">Add a scripture</a></p>
